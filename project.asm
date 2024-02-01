@@ -2,30 +2,64 @@ org 100h
 
 section .text
 
-start:
+_start:
     mov dx, welcome
     call print
-    loop:
+    
+    menu:
         mov dx, text
         call print
-        mov ah, 1
-	    int 21h
-	    cmp al, 176
-        je reverse
+        string:
+            mov ah, 0
+            int 16h
+            cmp al, 13
+            je stackout
+            cmp al, 8
+            je string
+            mov bl, al
+            mov bh, 0
+            push bx
+            mov dx, bx
+            mov ah, 2
+            int 21h
+            add byte [i], 1
+            jmp string 
+            
+        stackout:
+            cmp byte [i], 0
+            je string
+            mov dx, text2
+            call print
+            mov cx, [i]
+            looop:
+                pop dx
+                mov ah, 02h
+                int 21h
+            loop looop
+            mov ax, 0
+            mov [i], ax
+
+        mov dx, text1
+        call print
+        mov ah, 0
+        int 16h
         cmp al, 13
         je end
+        jmp menu
 
-print:
-    mov ah, 9
-    int 21h
+    end: 
+        mov ax, 4c00h
+        int 21h
 
-reverse:
-    jmp loop
-
-end: 
-    mov ax, 4c00h
-    int 21h
-
+    print:
+        mov ah, 9
+        int 21h
+        xor dx, dx
+        ret
+        
 section .data
-    welcome db "Program odwracajacy ciag znakow. $"
-    text db "Podaj ciag (operacje zatwierdzasz klawiszem '~' - TYLDA): $"
+    welcome db "Program odwracajacy ciag znakow.", 13, 10, "$"
+    text db 13, 10, "Podaj ciag (maks 254 znaki):", 13, 10, "$"
+    text1 db 13, 10, 13, 10, "Kliknij dowolny przycisk, aby kontynuowac, kliknij ENTER aby zakonczyc dzialanie programu.", 13, 10, "$"
+    text2 db 13, 10, 13, 10, "Wynik: ", 13, 10, "$"
+    i dw 0
