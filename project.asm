@@ -15,7 +15,7 @@ _start:
             cmp al, 13
             je stackout
             cmp al, 8
-            je string
+            je backspace
             mov bl, al
             mov bh, 0
             push bx
@@ -50,6 +50,21 @@ _start:
     end: 
         mov ax, 4c00h
         int 21h
+    
+    backspace:
+        cmp byte [i], 0
+        je string
+        mov ah, 02h
+        mov dx, 8
+        int 21h 
+        mov dx, 32
+        int 21h 
+        mov dx, 8
+        int 21h
+        pop ax
+        mov ax, 0
+        sub byte [i], 1
+        jmp string
 
     print:
         mov ah, 9
@@ -59,7 +74,7 @@ _start:
         
 section .data
     welcome db "Program odwracajacy ciag znakow.", 13, 10, "$"
-    text db 13, 10, "Podaj ciag (maks 254 znaki):", 13, 10, "$"
+    text db 13, 10, "Podaj ciag:", 13, 10, "$"
     text1 db 13, 10, 13, 10, "Kliknij dowolny przycisk, aby kontynuowac, kliknij ENTER aby zakonczyc dzialanie programu.", 13, 10, "$"
     text2 db 13, 10, 13, 10, "Wynik: ", 13, 10, "$"
     i dw 0
